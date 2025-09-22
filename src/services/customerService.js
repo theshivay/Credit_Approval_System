@@ -5,9 +5,19 @@ class CustomerService {
    * Register a new customer
    * @param {Object} customerData - Customer data
    * @returns {Object} - Created customer
+   * @throws {Error} - If phone number already exists
    */
   static async registerCustomer(customerData) {
     try {
+      // Check if phone number already exists
+      const existingCustomer = await Customer.findOne({
+        where: { phone_number: customerData.phone_number }
+      });
+      
+      if (existingCustomer) {
+        throw new Error('Phone number already registered');
+      }
+      
       // Calculate approved limit based on monthly income
       const approvedLimit = parseFloat(customerData.monthly_income) * 36;
       

@@ -19,15 +19,41 @@ class CustomerController {
         });
       }
       
-      const customer = await CustomerService.registerCustomer({
-        first_name,
-        last_name,
-        age,
-        phone_number,
-        monthly_income
-      });
+      // Additional validation
+      if (isNaN(age) || age <= 0) {
+        return res.status(400).json({
+          error: 'Invalid age',
+          message: 'Age must be a positive number'
+        });
+      }
       
-      return res.status(201).json(customer);
+      if (isNaN(monthly_income) || monthly_income <= 0) {
+        return res.status(400).json({
+          error: 'Invalid income',
+          message: 'Monthly income must be a positive number'
+        });
+      }
+      
+      try {
+        const customer = await CustomerService.registerCustomer({
+          first_name,
+          last_name,
+          age,
+          phone_number,
+          monthly_income
+        });
+        
+        return res.status(201).json(customer);
+      } catch (serviceError) {
+        if (serviceError.message === 'Phone number already registered') {
+          return res.status(409).json({ 
+            error: 'Duplicate phone number',
+            message: 'Phone number already registered in the system' 
+          });
+        }
+        // Re-throw for the outer catch block to handle
+        throw serviceError;
+      }
     } catch (error) {
       console.error('Error in registerCustomer controller:', error);
       return res.status(500).json({ 

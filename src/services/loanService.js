@@ -9,6 +9,27 @@ class LoanService {
    */
   static async createLoan(loanData) {
     try {
+      // Check if customer exists
+      const customer = await Customer.findByPk(loanData.customer_id);
+      if (!customer) {
+        throw new Error('Customer not found');
+      }
+      
+      // Check for existing pending or active loan applications with similar amounts
+      // This is to prevent duplicate submissions of the same loan application
+      const existingLoan = await Loan.findOne({
+        where: {
+          customer_id: loanData.customer_id,
+          loan_amount: loanData.loan_amount,
+          tenure: loanData.tenure,
+          status: ['PENDING', 'APPROVED', 'ACTIVE']
+        }
+      });
+      
+      if (existingLoan) {
+        throw new Error('Similar loan application already exists for this customer');
+      }
+      
       // Check eligibility first
       const eligibility = await CreditService.checkEligibility(
         loanData.customer_id,

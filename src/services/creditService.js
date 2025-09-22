@@ -98,9 +98,10 @@ class CreditService {
    * @param {Number} customerId - Customer ID
    * @param {Number} loanAmount - Requested loan amount
    * @param {Number} tenure - Loan tenure in months
+   * @param {Number} requestedInterestRate - Interest rate requested (optional)
    * @returns {Object} - Eligibility result
    */
-  static async checkEligibility(customerId, loanAmount, tenure) {
+  static async checkEligibility(customerId, loanAmount, tenure, requestedInterestRate = null) {
     try {
       // Get customer
       const customer = await Customer.findByPk(customerId);
@@ -131,23 +132,28 @@ class CreditService {
       
       // Determine base interest rate based on credit score
       let interestRate;
+      let correctedInterestRate;
+      
       if (creditScore >= 80) {
-        interestRate = 6;  // Excellent score
+        correctedInterestRate = 6;  // Excellent score
       } else if (creditScore >= 60) {
-        interestRate = 8;  // Good score
+        correctedInterestRate = 8;  // Good score
       } else if (creditScore >= 40) {
-        interestRate = 12; // Fair score
+        correctedInterestRate = 12; // Fair score
       } else {
-        interestRate = 16; // Poor score
+        correctedInterestRate = 16; // Poor score
       }
       
-      // Adjust interest rate based on debt ratio
+      // Adjust corrected interest rate based on debt ratio
       if (debtToIncomeRatio > 0.5) {
-        interestRate += 2;
+        correctedInterestRate += 2;
       }
+      
+      // Use the requested interest rate if provided, otherwise use the corrected one
+      interestRate = requestedInterestRate || correctedInterestRate;
       
       // Monthly payment calculation: PMT = P * r * (1+r)^n / ((1+r)^n - 1)
-      const monthlyRate = interestRate / 12 / 100;
+      const monthlyRate = correctedInterestRate / 12 / 100;
       const monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure) / (Math.pow(1 + monthlyRate, tenure) - 1);
       
       // Check if customer can afford new EMI (typically <= 50% of income including current EMIs)
@@ -173,8 +179,8 @@ class CreditService {
         credit_score: creditScore,
         approval: approval_probability >= 60,
         approval_probability,
-        interest_rate: parseFloat(interestRate.toFixed(2)),
-        corrected_interest_rate: parseFloat(interestRate.toFixed(2)),
+        interest_rate: parseFloat(interestRate ? interestRate.toFixed(2) : correctedInterestRate.toFixed(2)),
+        corrected_interest_rate: parseFloat(correctedInterestRate.toFixed(2)),
         tenure,
         monthly_payment: parseFloat(monthlyPayment.toFixed(2))
       };
