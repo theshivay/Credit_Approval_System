@@ -39,7 +39,7 @@ npm install
 
 3. Configure environment variables
 ```bash
-# Copy the example .env file
+# Copy .env file
 cp .env
 # Edit the .env file with your configuration preferences
 ```
@@ -50,7 +50,7 @@ The application uses SQLite, which is a file-based database that doesn't require
 
 1. Import data from Excel files
 ```bash
-# Make sure your PATH includes Node.js binaries
+# Make sure your PATH includes Node.js binaries (For MacOS)
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 node scripts/import-data.js
 ```
@@ -58,7 +58,7 @@ node scripts/import-data.js
 ### Running the Application
 
 ```bash
-# Make sure your PATH includes Node.js binaries
+# Make sure your PATH includes Node.js binaries (For MacOS)
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 
 # Development mode
