@@ -115,6 +115,7 @@ This credit score directly impacts loan eligibility and interest rates offered t
 
 ```
 credit-approval-system/
+├── files/                  # Demo video
 ├── src/
 │   ├── config/             # Configuration files
 │   ├── controllers/        # Route controllers
@@ -124,7 +125,6 @@ credit-approval-system/
 │   ├── services/           # Business logic
 │   └── app.js              # Express app
 ├── scripts/                # Scripts for data import, etc.
-├── tests/                  # Test files
 ├── credit_approval.sqlite  # SQLite database file
 ├── .env                    # Environment variables
 └── README.md               # Project documentation
